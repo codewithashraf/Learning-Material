@@ -93,13 +93,6 @@ const galaxy = () => {
 
 galaxy()
 
-// star banaye hain
-const starGeometry = new THREE.BufferGeometry();
-const starPosition = new Float32Array(guiChange.count * 3);
-
-for( let i = 0; i < guiChange.count; i++ ){
-  starPosition[i] = Math.random()
-}
 
 // lil gui setting banai hai
 gui.add(guiChange, 'count').min(100).max(10000).step(100).onFinishChange(galaxy);
@@ -125,7 +118,7 @@ window.addEventListener("resize", () => {
   // Update camera
   camera.aspect = sizes.width / sizes.height;
   camera.updateProjectionMatrix();
-
+  
   // Update renderer
   renderer.setSize(sizes.width, sizes.height);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -143,9 +136,9 @@ const camera = new THREE.PerspectiveCamera(
 );
 
 const cameraPosition = {
-  x: 0,
-  y: 0,
-  z: 12,
+  x: 3,
+  y: 3,
+  z: 3,
 };
 
 // Set initial camera position
@@ -162,6 +155,18 @@ gui.add(cameraPosition, 'z').min(-20).max(20).step(1).onChange((val) => {
 });
 
 scene.add(camera);
+
+// star banaye hain
+const starGeometry = new THREE.BufferGeometry();
+const starPosition = new Float32Array(guiChange.count * 3);
+for( let i = 0; i < guiChange.count * 3 ; i++ ){
+  // console.log( camera.position.distanceTo(particles.position) )
+  starPosition[i] = (Math.random() - .5) * camera.position.distanceTo(particles.position) * 70 
+}
+starGeometry.setAttribute('position', new THREE.BufferAttribute(starPosition, 3))
+const starMaterial = new THREE.PointsMaterial({  size: .001, sizeAttenuation: true,})
+const stars = new THREE.Points(starGeometry, starMaterial)
+scene.add(stars)
 
 // Controls
 const controls = new OrbitControls(camera, canvas);
@@ -183,7 +188,8 @@ const clock = new THREE.Clock();
 
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
-
+  stars.rotation.y = elapsedTime * .05
+  particles.rotation.y = elapsedTime * .2
   // Update controls
   controls.update();
 
